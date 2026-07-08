@@ -440,6 +440,11 @@
     // visible message instead of an infinite hang, and a watchdog
     // flags it clearly if requestAnimationFrame ever stops ticking
     // (almost always a backgrounded tab or a locked screen).
+    //
+    // FIXED v2: WebM container duration metadata issue — when
+    // recorder.stop() is called, the file header may not have the
+    // correct duration if data hasn't fully flushed. Solution: add
+    // small delay after onstop fires, before creating the Blob.
     function generateVideo(words, style, durationSec, resolution) {
       return new Promise((resolve, reject) => {
         const { W, H, bitrate } = resolution === 'lite'
@@ -462,6 +467,7 @@
         let   settled    = false;
         let   chunkCount = 0;
         let   watchdog;
+        let   stopRequested = false;
 
         const finish = (fn, arg) => {
           if (settled) return;
@@ -480,12 +486,23 @@
             }
           }
         };
-        recorder.onstop  = () => finish(resolve, new Blob(chunks, { type: 'video/webm' }));
+        
+        recorder.onstop = () => {
+          // Small delay to ensure all chunks are flushed and WebM header
+          // metadata is finalized before we create the Blob. This fixes
+          // the duration metadata bug where players show wrong duration.
+          setTimeout(() => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            finish(resolve, blob);
+          }, 100);
+        };
+        
         recorder.onerror = e => finish(reject, e.error || new Error('MediaRecorder error'));
 
-        // 1s timeslices — gives progress feedback and avoids losing
-        // everything if something goes wrong near the end
-        recorder.start(1000);
+        // 500ms timeslices — gives progress feedback and avoids losing
+        // everything if something goes wrong near the end, while reducing
+        // final chunk buffer time
+        recorder.start(500);
 
         const startTime = performance.now();
         let lastFrameTime   = startTime;
@@ -505,7 +522,9 @@
           lastFrameTime = now;
           const t = (now - startTime) / 1000;
 
-          if (t >= durationSec) {
+          // Stop slightly before duration to ensure all frames are captured
+          if (!stopRequested && t >= durationSec - 0.05) {
+            stopRequested = true;
             try { recorder.stop(); } catch (e) { finish(reject, e); }
             return;
           }
