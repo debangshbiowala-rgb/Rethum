@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CaptionForge — Green Screen Video Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+ <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="wrap">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="eyebrow">Audio to Green Screen Video</div>
+      <h1>Caption<span>Forge</span></h1>
+      <div class="sub">Deepgram AI &bull; Noise Removal &bull; 6 Styles</div>
+    </div>
+
+    <!-- STEP 1: API KEY -->
+    <div class="card">
+      <div class="card-label">Step 1 &mdash; Deepgram API Key</div>
+      <div class="input-wrap">
+        <input type="password" id="apiKey" placeholder="Paste your Deepgram key here..." />
+        <button class="toggle-vis" id="toggleBtn" onclick="toggleKey()">SHOW</button>
+      </div>
+      <div class="err-msg" id="keyErr">API key is required to continue.</div>
+      <div class="hint">
+        No key?
+        <a href="https://console.deepgram.com/signup" target="_blank" rel="noopener">Get one free at Deepgram</a>
+        &mdash; free tier is enough.
+      </div>
+    </div>
+
+    <!-- STEP 2: AUDIO UPLOAD -->
+    <div class="card">
+      <div class="card-label">Step 2 &mdash; Upload Audio / Video</div>
+      <div class="file-zone" id="fileZone">
+        <input type="file" id="audioFile" accept="audio/*,video/*,.mp3,.mp4,.wav,.m4a,.ogg,.flac" />
+        <span class="file-icon" id="fileIcon">&#9099;</span>
+        <div class="fz-text" id="fzText">Tap to choose file</div>
+        <div class="fz-name" id="fzName"></div>
+        <div class="fz-sub" id="fzSub">MP3, MP4, WAV, M4A, OGG, FLAC</div>
+      </div>
+      <div class="err-msg" id="fileErr">Please select an audio or video file.</div>
+    </div>
+
+    <!-- STEP 2b: LANGUAGE -->
+    <div class="card">
+      <div class="card-label">Step 2b &mdash; Song Language</div>
+      <div class="lang-grid" id="langGrid">
+        <div class="lang-btn active" data-lang="auto" onclick="setLang(this)">
+          <div class="lang-icon">&#9670;</div>
+          <div class="lang-lbl">Auto-detect</div>
+          <div class="lang-sub">Recommended</div>
+        </div>
+        <div class="lang-btn" data-lang="hi" onclick="setLang(this)">
+          <div class="lang-icon">&#9670;</div>
+          <div class="lang-lbl">Hindi</div>
+          <div class="lang-sub">हिन्दी</div>
+        </div>
+        <div class="lang-btn" data-lang="en" onclick="setLang(this)">
+          <div class="lang-icon">&#9670;</div>
+          <div class="lang-lbl">English</div>
+          <div class="lang-sub">EN</div>
+        </div>
+        <div class="lang-btn" data-lang="es" onclick="setLang(this)">
+          <div class="lang-icon">&#9670;</div>
+          <div class="lang-lbl">Spanish</div>
+          <div class="lang-sub">ES</div>
+        </div>
+        <div class="lang-btn" data-lang="fr" onclick="setLang(this)">
+          <div class="lang-icon">&#9670;</div>
+          <div class="lang-lbl">French</div>
+          <div class="lang-sub">FR</div>
+        </div>
+        <div class="lang-btn" data-lang="ko" onclick="setLang(this)">
+          <div class="lang-icon">&#9670;</div>
+          <div class="lang-lbl">Korean</div>
+          <div class="lang-sub">한국어</div>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:10px;">
+        Using <strong style="color:var(--accent)">Whisper Large</strong> model — handles singing, accents, and mixed languages.
+      </div>
+    </div>
+
+    <!-- STEP 3: STYLE -->
+    <div class="card">
+      <div class="card-label">Step 3 &mdash; Caption Style</div>
+      <div class="styles">
+
+        <div class="style-btn active" data-style="classic" onclick="setStyle(this)">
+          <div class="style-preview" style="background:#000; color:#fff; font-family:'Arial Black',Arial; text-shadow:none;">
+            LYRIC
+          </div>
+          <div class="style-name">CLASSIC</div>
+        </div>
+
+        <div class="style-btn" data-style="neon" onclick="setStyle(this)">
+          <div class="style-preview" style="background:#0a0010; color:#e040fb; text-shadow:0 0 12px #e040fb, 0 0 28px #e040fb;">
+            LYRIC
+          </div>
+          <div class="style-name">NEON</div>
+        </div>
+
+        <div class="style-btn" data-style="fire" onclick="setStyle(this)">
+          <div class="style-preview" style="background:#0d0500; color:#ff9900; text-shadow:0 0 10px #ff4400, 0 0 24px #ff2200; font-style:italic;">
+            LYRIC
+          </div>
+          <div class="style-name">FIRE</div>
+        </div>
+
+        <div class="style-btn" data-style="clean" onclick="setStyle(this)">
+          <div class="style-preview" style="background:linear-gradient(135deg,#1a1a2e,#0f3460); color:#e0f7fa; font-weight:300; letter-spacing:.08em;">
+            lyric
+          </div>
+          <div class="style-name">MINIMAL</div>
+        </div>
+
+        <div class="style-btn" data-style="retro" onclick="setStyle(this)">
+          <div class="style-preview" style="background:#1a1200; color:#f5c518; font-family:Georgia,serif; font-style:italic;">
+            Lyric
+          </div>
+          <div class="style-name">RETRO</div>
+        </div>
+
+        <div class="style-btn" data-style="bold" onclick="setStyle(this)">
+          <div class="style-preview" style="background:#0a0a0a; color:#fff; -webkit-text-stroke:2px #ff5c72; font-weight:900; letter-spacing:-.02em;">
+            LYRIC
+          </div>
+          <div class="style-name">OUTLINE</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STEP 3b: VIDEO QUALITY -->
+    <div class="card">
+      <div class="card-label">Step 3b &mdash; Video Quality</div>
+      <div class="res-grid" id="resGrid">
+        <div class="lang-btn active" data-res="full" onclick="setResolution(this)">
+          <div class="lang-icon">&#9670;</div>
+          <div class="lang-lbl">Full HD</div>
+          <div class="lang-sub">1080 &times; 1920</div>
+        </div>
+        <div class="lang-btn" data-res="lite" onclick="setResolution(this)">
+          <div class="lang-icon">&#9670;</div>
+          <div class="lang-lbl">Lite</div>
+          <div class="lang-sub">720 &times; 1280</div>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:10px;">
+        Rendering happens on your own device and takes about as long as the song itself. Keep this tab open and your screen on until it's done &mdash; Lite exports a smaller file and is easier on older phones.
+      </div>
+    </div>
+
+    <!-- GENERATE BUTTON -->
+    <button class="btn-process" id="genBtn" onclick="processAudio()">
+      Process &amp; Generate Video
+    </button>
+
+    <!-- PROGRESS CARD -->
+    <div class="card progress-card" id="progressCard">
+      <div class="prog-header">
+        <span class="prog-label" id="progLabel">Initialising...</span>
+        <span class="prog-pct" id="progPct">0%</span>
+      </div>
+      <div class="prog-bar">
+        <div class="prog-fill" id="progFill"></div>
+      </div>
+      <div class="log-box" id="logBox"></div>
+    </div>
+
+    <!-- DOWNLOAD SECTION -->
+    <div class="card dl-section" id="dlSection">
+      <div class="card-label">Step 4 &mdash; Download</div>
+      <div class="dl-row">
+        <button class="btn-dl primary" onclick="downloadVideo()">Green Screen</button>
+        <button class="btn-dl" onclick="showGreenScreenNote()">Transparent Info</button>
+      </div>
+      <div class="dl-note">
+        Green screen (chroma key) can be removed in CapCut, Premiere, or DaVinci Resolve.
+      </div>
+    </div>
+
+    <!-- DEVELOPER CARD -->
+    <div class="dev-card">
+      <div class="dev-left">
+        <div class="dev-by">Developed by</div>
+        <div class="dev-name">debangsh_bio-wala</div>
+      </div>
+      <a class="ig-link" href="https://www.instagram.com/debangshuooppp?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">
+        <div class="ig-pill">
+          <div class="ig-layer front">Tap for Instagram</div>
+          <div class="ig-layer back">@Debangsh</div>
+        </div>
+      </a>
+    </div>
+
+  </div><!-- /wrap -->
+ <script src="js/script.js"></script>
+</body>
+</html>
